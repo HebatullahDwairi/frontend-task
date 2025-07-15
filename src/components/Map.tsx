@@ -1,24 +1,26 @@
 
 import 'mapbox-gl/dist/mapbox-gl.css';
-import MapboxMap, {NavigationControl, FullscreenControl, useControl, type MapRef} from 'react-map-gl/mapbox';
+import MapboxMap, { NavigationControl, FullscreenControl, useControl, type MapRef } from 'react-map-gl/mapbox';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { useRef, type Dispatch, type SetStateAction, type RefObject } from 'react';
-import type {Feature, Polygon} from 'geojson';
-import { Source,Layer } from 'react-map-gl/mapbox';
-
+import { useRef, type Dispatch, type SetStateAction, type RefObject} from 'react';
+import type { Feature, Polygon } from 'geojson';
+import { Source, Layer } from 'react-map-gl/mapbox';
+import type { ZoneType } from './sites';
+import DrawDefaultStyles from '../MapBoxDrawDefaultTheme'
 
 type MapProps = {
   isEditing: boolean,
-  features: Feature<Polygon>[],
-  setFeatures: Dispatch<SetStateAction<Feature<Polygon>[]>>
+  zones: ZoneType[],
+  setZones: Dispatch<SetStateAction<ZoneType[]>>
   mapRef: RefObject<MapRef | null>
 };
 
+
 type DrawControlProps = ConstructorParameters<typeof MapboxDraw>[0] & {
-  onCreate: (e: {features: []}) => void,
-  onUpdate: (e: {features: [], action: string}) => void,
-  onDelete: (e: {features: []}) => void,
+  onCreate: (e: { features: [] }) => void,
+  onUpdate: (e: { features: [], action: string }) => void,
+  onDelete: (e: { features: [] }) => void,
   onInit?: (draw: MapboxDraw) => void
 };
 
@@ -28,17 +30,17 @@ const DrawControl = (props: DrawControlProps) => {
     const draw = new MapboxDraw(props);
     props.onInit?.(draw);
     return draw;
-  }, 
-  ({map}) => {
-    map.on('draw.create', props.onCreate);
-    map.on('draw.update', props.onUpdate);
-    map.on('draw.delete', props.onDelete);
   },
-  ({map}) => {
-    map.off('draw.create', props.onCreate);
-    map.off('draw.update', props.onUpdate);
-    map.off('draw.delete', props.onDelete);
-  });
+    ({ map }) => {
+      map.on('draw.create', props.onCreate);
+      map.on('draw.update', props.onUpdate);
+      map.on('draw.delete', props.onDelete);
+    },
+    ({ map }) => {
+      map.off('draw.create', props.onCreate);
+      map.off('draw.update', props.onUpdate);
+      map.off('draw.delete', props.onDelete);
+    });
 
   return null;
 }
@@ -46,23 +48,45 @@ const DrawControl = (props: DrawControlProps) => {
 
 
 
+const Map: React.FC<MapProps> = ({ isEditing, zones, setZones, mapRef }) => {
 
-const Map: React.FC<MapProps> = ({isEditing, features, setFeatures, mapRef}) => {
- 
   const drawRef = useRef<MapboxDraw | null>(null);
 
-  const onCreate = (e: {features: []}) => {
-    setFeatures(prev => [...prev, ...e.features]);
+
+
+  const onCreate = (e: { features: [] }) => {
+    const newZones: ZoneType[] = e.features.map((f: Feature<Polygon>) => {
+      f.properties = {
+        color: 'red'
+      }
+      
+      return {
+        feature: f,
+        name: "some name",
+      }
+    });
+
+    setZones(prev => [...prev, ...newZones]);
   }
 
-  const onUpdate = (e: {features: []}) => {
-     requestAnimationFrame(() =>{
-      setFeatures(prev => prev.map(f => (f.id === e.features[0].id ? e.features[0] : f)));
-     })
+  const onUpdate = (e: { features: Feature<Polygon>[] }) => {
+    setZones(prev => prev.map((zone: ZoneType) => {
+
+      if (zone.feature.id === e.features[0].id) {
+        const updatedZone: ZoneType = {
+          ...zone,
+          feature: e.features[0],
+        }
+
+        return updatedZone;
+      }
+      else
+        return zone;
+    }));
   }
 
-  const onDelete = (e: {features: []}) => {
-    setFeatures(features.filter((f) => f.id !== e.features[0].id));
+  const onDelete = (e: { features: Feature<Polygon>[] }) => {
+    setZones(zones.filter((zone) => zone.feature.id !== e.features[0].id));
   }
 
 
@@ -80,7 +104,7 @@ const Map: React.FC<MapProps> = ({isEditing, features, setFeatures, mapRef}) => 
         style={{
           borderRadius: "10px",
         }}
-        
+
       >
         <NavigationControl />
         <FullscreenControl />
@@ -93,37 +117,42 @@ const Map: React.FC<MapProps> = ({isEditing, features, setFeatures, mapRef}) => 
           onCreate={onCreate}
           onUpdate={onUpdate}
           onDelete={onDelete}
+          userProperties={true}
+          styles={
+            DrawDefaultStyles
+          }
           onInit={(draw) => {
             drawRef.current = draw;
             requestAnimationFrame(() => {
               if (isEditing) {
                 try {
-                  draw.deleteAll();
-                  features.forEach((f) => draw.add(f));
+                  //draw.deleteAll();
+                  zones.forEach((z) => draw.add(z.feature));
+                  console.log(zones[0].feature)
                 }
-                catch(err) {
+                catch (err) {
                   console.log(err);
                 }
               }
             });
           }}
         />}
-        {!isEditing && features.length > 0 && (
-          <Source id="zones" type="geojson" data={{ type: 'FeatureCollection', features: features }}>
+        {!isEditing && zones.length > 0 && (
+          <Source type='geojson' data={{ type: 'FeatureCollection', features: zones.map(z => z.feature) }}>
             <Layer
-              id="zone-fill"
+              id={`zone-fill`}
               type="fill"
-              paint={{ 'fill-color': '#088', 'fill-opacity': 0.4 }}
+              paint={{ 'fill-color': ['get', 'color'], 'fill-opacity': 0.3 }}
             />
             <Layer
-              id="zone-outline"
+              id={`zone-outline`}
               type="line"
-              paint={{ 'line-color': '#000', 'line-width': 2 }}
+              paint={{ 'line-color': ['get', 'color'], 'line-width': 2 }}
             />
           </Source>
         )}
       </MapboxMap>
-      {isEditing && 
+      {isEditing &&
         <p className='absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 p-2 text-white text-xs font-bold rounded-md backdrop-blur-md'>
           Draw & Add a New Zone
         </p>}
