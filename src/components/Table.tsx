@@ -15,22 +15,6 @@ type ZoneRow = {
   parameter: number,
 }
 
-const mockData: ZoneRow[] = [
-  {
-    color: 'red', 
-    zoneName: 'zone-1',
-    type: 'idk',
-    area: 323,
-    parameter: 211
-  },
-  {
-    color: 'green', 
-    zoneName: 'zone-2',
-    type: 'idk2',
-    area: 234,
-    parameter: 89
-  }
-];
 
 
 const colHelper = createColumnHelper<ZoneRow>()
@@ -67,9 +51,9 @@ export default function Table({data}) {
       <table>
         <thead>
           {table.getHeaderGroups().map(headerGroup => (
-            <tr key={headerGroup.id}>
+            <tr key={headerGroup.id} className='border-b-1 border-gray-400'>
               {headerGroup.headers.map(header => (
-                <th key={header.id}>
+                <th key={header.id} className='p-3'>
                   {header.isPlaceholder
                     ? null
                     : flexRender(
@@ -83,9 +67,9 @@ export default function Table({data}) {
         </thead>
         <tbody>
           {table.getRowModel().rows.map(row => (
-            <tr key={row.id}>
+            <tr key={row.id} className='border-b-1 border-gray-300 bg-gray-100'>
               {row.getVisibleCells().map(cell => (
-                <td key={cell.id}>
+                <td key={cell.id} className='p-2 '>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}

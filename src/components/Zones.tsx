@@ -50,15 +50,6 @@ const Zones: React.FC<ZonesProps> = ({isEditing, setIsEditing, zones, mapRef, se
 
       <div>
 
-        <ul>
-          {zones.map((zone, idx) => <li key={zone.feature.id} onClick={()=>{moveToZone(zone.feature)}} className="bg-gray-100 rounded-md p-2 m-2 font-bold text-sm">
-            <button onClick={() => {changeZoneColor(zone.feature.id, 'green')}}>green</button>
-            <button onClick={() => {changeZoneColor(zone.feature.id, 'yellow')}}>yellow</button>
-            <button onClick={() => {changeZoneColor(zone.feature.id, 'brown')}}>brown</button>
-            {zone.feature.properties?.color}
-          </li>)}
-        </ul>
-
       </div>
       <Table data={zones.map(z => ({
         zoneName: z.name,
@@ -72,3 +63,8 @@ const Zones: React.FC<ZonesProps> = ({isEditing, setIsEditing, zones, mapRef, se
 }
 
 export default Zones;
+
+
+//<button onClick={() => {changeZoneColor(zone.feature.id, 'green')}}>green</button>
+   //         <button onClick={() => {changeZoneColor(zone.feature.id, 'yellow')}}>yellow</button>
+     //       <button onClick={() => {changeZoneColor(zone.feature.id, 'brown')}}>brown</button>
