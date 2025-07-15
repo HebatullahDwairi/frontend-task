@@ -12,6 +12,7 @@
   "dependencies": {
     "@mapbox/mapbox-gl-draw": "^1.5.0",
     "@tailwindcss/vite": "^4.1.11",
+    "@tanstack/react-table": "^8.21.3",
     "@turf/turf": "^7.2.0",
     "@types/mapbox__mapbox-gl-draw": "^1.4.9",
     "@types/mapbox-gl": "^3.4.1",

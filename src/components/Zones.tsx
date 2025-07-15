@@ -3,6 +3,7 @@ import type { Feature, Polygon } from "geojson";
 import { area, bbox, length } from "@turf/turf";
 import type { MapRef } from "react-map-gl/mapbox";
 import type { ZoneType } from "./sites";
+import Table from "./Table";
 
 type ZonesProps = {
   isEditing: boolean,
@@ -11,7 +12,6 @@ type ZonesProps = {
   setZones: Dispatch<SetStateAction<ZoneType[]>>
   mapRef: RefObject<MapRef | null>
 };
-
 
 
 const Zones: React.FC<ZonesProps> = ({isEditing, setIsEditing, zones, mapRef, setZones}) => {
@@ -52,14 +52,21 @@ const Zones: React.FC<ZonesProps> = ({isEditing, setIsEditing, zones, mapRef, se
 
         <ul>
           {zones.map((zone, idx) => <li key={zone.feature.id} onClick={()=>{moveToZone(zone.feature)}} className="bg-gray-100 rounded-md p-2 m-2 font-bold text-sm">
-            <p>Zone Name: zone-{idx+1} | area: {area(zone.feature)} m2 | parameter: {length(zone.feature) * 1000} m</p>
             <button onClick={() => {changeZoneColor(zone.feature.id, 'green')}}>green</button>
             <button onClick={() => {changeZoneColor(zone.feature.id, 'yellow')}}>yellow</button>
             <button onClick={() => {changeZoneColor(zone.feature.id, 'brown')}}>brown</button>
             {zone.feature.properties?.color}
           </li>)}
         </ul>
+
       </div>
+      <Table data={zones.map(z => ({
+        zoneName: z.name,
+        type: 'idk',
+        area: area(z.feature),
+        parameter: length(z.feature) * 1000,
+        color: z.feature.properties?.color
+      }))}/>
     </div>
   );
 }
