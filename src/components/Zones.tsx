@@ -26,16 +26,24 @@ const Zones: React.FC<ZonesProps> = ({isEditing, setIsEditing }) => {
       </div>
 
       
-      <Table 
-        data={zones.map(z => ({
-          zoneName: z.name,
-          type: 'idk',
-          area: area(z.feature),
-          parameter: length(z.feature) * 1000,
-          color: z.feature.properties?.color,
-          id: z.feature.id
-        }))}
-      />
+      <div className="w-full flex flex-col ">
+        {zones.length > 0 ? <Table
+          data={zones.map(z => ({
+            zoneName: z.name,
+            type: 'type',
+            area: area(z.feature),
+            parameter: length(z.feature) * 1000,
+            color: z.feature.properties?.color,
+            id: z.feature.id
+          }))}
+          isEditing={isEditing}
+        />:
+        <div className="text-lg font-bold text-gray-400 text-center mt-24">
+          No Zones Available Yet
+          <p className="text-xs font-medium p-1">you can add zones by drawing on the map</p>
+        </div>
+        }
+      </div>
     </div>
   );
 }

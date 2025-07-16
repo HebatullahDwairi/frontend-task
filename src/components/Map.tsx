@@ -9,6 +9,7 @@ import { Source, Layer } from 'react-map-gl/mapbox';
 import type { ZoneType } from './sites';
 import DrawDefaultStyles from '../MapBoxDrawDefaultTheme'
 import useMap from '../hooks/useMap';
+import { bbox } from '@turf/turf';
 
 type MapProps = {
   isEditing: boolean,
@@ -48,26 +49,30 @@ const DrawControl = (props: DrawControlProps) => {
 
 
 
-
 const Map: React.FC<MapProps> = ({ isEditing }) => {
 
   //const drawRef = useRef<MapboxDraw | null>(null);
-  const { drawRef, zones, setZones, mapRef } = useMap();
+  const { drawRef, zones, setZones, mapRef } = useMap();;
 
 
   const onCreate = (e: { features: [] }) => {
-    const newZones: ZoneType[] = e.features.map((f: Feature<Polygon>) => {
-      f.properties = {
-        color: 'red'
-      }
-      
-      return {
-        feature: f,
-        name: "some name",
-      }
+    console.log(e.features);
+    
+    setZones(prev => {
+      const newZones: ZoneType[] = e.features.map((f: Feature<Polygon>, i: number) => {
+        f.properties = {
+          color: 'steelblue'
+        };
+
+        return {
+          feature: f,
+          name: `Zone-${prev.length + i + 1}`,
+        };
+      });
+
+      return [...prev, ...newZones];
     });
 
-    setZones(prev => [...prev, ...newZones]);
   }
 
   const onUpdate = (e: { features: Feature<Polygon>[] }) => {
@@ -79,6 +84,10 @@ const Map: React.FC<MapProps> = ({ isEditing }) => {
           feature: e.features[0],
         }
 
+        updatedZone.feature.properties = {
+          color: zone.feature.properties?.color
+        };
+
         return updatedZone;
       }
       else
@@ -86,8 +95,8 @@ const Map: React.FC<MapProps> = ({ isEditing }) => {
     }));
   }
 
-  const onDelete = (e: { features: Feature<Polygon>[] }) => {
-    setZones(zones.filter((zone) => zone.feature.id !== e.features[0].id));
+  const onDelete = (e: { features: Feature<Polygon>[] }) => {    
+    setZones(prev => prev.filter((zone) => zone.feature.id !== e.features[0].id));
   }
 
 
@@ -99,16 +108,34 @@ const Map: React.FC<MapProps> = ({ isEditing }) => {
         initialViewState={{
           longitude: 35.9,
           latitude: 31.9,
-          zoom: 12,
+          zoom: 8,
         }}
         mapStyle={'mapbox://styles/mapbox/satellite-v9'}
         style={{
           borderRadius: "10px",
         }}
+        onLoad={() => {
+          const [minLng, minLat, maxLng, maxLat] = bbox(EXAMPLE);
 
+            mapRef.current?.fitBounds(
+              [
+                [minLng, minLat],
+                [maxLng, maxLat]
+              ],
+              {padding: 30, duration: 3000}
+            );
+        }}
       >
         <NavigationControl />
         <FullscreenControl />
+        <Source type='geojson' data={EXAMPLE}>
+          <Layer
+              id='outline'
+              type="line"
+              paint={{ 'line-color': 'red', 'line-width': 2 }}
+          />
+        </Source>
+        
         {isEditing && <DrawControl
           displayControlsDefault={false}
           controls={{
@@ -153,6 +180,7 @@ const Map: React.FC<MapProps> = ({ isEditing }) => {
             />
           </Source>
         )}
+        
       </MapboxMap>
       {isEditing &&
         <p className='absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 p-2 text-white text-xs font-bold rounded-md backdrop-blur-md'>
@@ -161,5 +189,42 @@ const Map: React.FC<MapProps> = ({ isEditing }) => {
     </div>
   );
 }
+
+
+const EXAMPLE = {
+  "id": "WHvpm5nJ6K68FZh01jmqEDjWvTKTuC5O",
+  "type": "Feature",
+  "properties": {
+    "color": "steelblue"
+  },
+  "geometry": {
+    "coordinates": [
+      [
+        [
+          35.83135292821629,
+          31.96957542996384
+        ],
+        [
+          35.83023059578787,
+          31.972041262379165
+        ],
+        [
+          35.834980369017075,
+          31.97360307463879
+        ],
+        [
+          35.836211908565105,
+          31.97135576489883
+        ],
+        [
+          35.83135292821629,
+          31.96957542996384
+        ]
+      ]
+    ],
+    "type": "Polygon"
+  }
+}
+
 
 export default Map;
