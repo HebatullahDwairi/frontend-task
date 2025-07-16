@@ -1,43 +1,20 @@
-import type { Dispatch, RefObject, SetStateAction } from "react";
-import type { Feature, Polygon } from "geojson";
-import { area, bbox, length } from "@turf/turf";
-import type { MapRef } from "react-map-gl/mapbox";
-import type { ZoneType } from "./sites";
+import type { Dispatch, SetStateAction } from "react";
+import { area, length } from "@turf/turf";
 import Table from "./Table";
+import useMap from "../hooks/useMap";
 
 type ZonesProps = {
   isEditing: boolean,
   setIsEditing: Dispatch<SetStateAction<boolean>>,
-  zones: ZoneType[],
-  setZones: Dispatch<SetStateAction<ZoneType[]>>
-  mapRef: RefObject<MapRef | null>
 };
 
 
-const Zones: React.FC<ZonesProps> = ({isEditing, setIsEditing, zones, mapRef, setZones}) => {
+const Zones: React.FC<ZonesProps> = ({isEditing, setIsEditing }) => {
+
+  const { zones } = useMap();
+
   const handleClick = () => {
     setIsEditing(!isEditing);
-  }
-  const changeZoneColor  = (zoneId: number | string | undefined, color: string) => {
-    setZones(prev =>
-      prev.map(zone =>
-        zone.feature.id === zoneId ? { ...zone, feature: {...zone.feature, properties: { color: color }}} : zone
-      )
-    );
-
-  }
-  const moveToZone = (feature: Feature<Polygon>) => {
-    if (feature) {
-      const [minLng, minLat, maxLng, maxLat] = bbox(feature);
-
-      mapRef.current?.fitBounds(
-        [
-          [minLng, minLat],
-          [maxLng, maxLat]
-        ],
-        {padding: 40, duration: 1000}
-      );
-    }
   }
 
   return (
@@ -48,16 +25,17 @@ const Zones: React.FC<ZonesProps> = ({isEditing, setIsEditing, zones, mapRef, se
         onClick={handleClick}>{isEditing? 'Save' : 'Add or Edit'}</button>
       </div>
 
-      <div>
-
-      </div>
-      <Table data={zones.map(z => ({
-        zoneName: z.name,
-        type: 'idk',
-        area: area(z.feature),
-        parameter: length(z.feature) * 1000,
-        color: z.feature.properties?.color
-      }))}/>
+      
+      <Table 
+        data={zones.map(z => ({
+          zoneName: z.name,
+          type: 'idk',
+          area: area(z.feature),
+          parameter: length(z.feature) * 1000,
+          color: z.feature.properties?.color,
+          id: z.feature.id
+        }))}
+      />
     </div>
   );
 }
@@ -65,6 +43,3 @@ const Zones: React.FC<ZonesProps> = ({isEditing, setIsEditing, zones, mapRef, se
 export default Zones;
 
 
-//<button onClick={() => {changeZoneColor(zone.feature.id, 'green')}}>green</button>
-   //         <button onClick={() => {changeZoneColor(zone.feature.id, 'yellow')}}>yellow</button>
-     //       <button onClick={() => {changeZoneColor(zone.feature.id, 'brown')}}>brown</button>

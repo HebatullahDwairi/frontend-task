@@ -1,19 +1,17 @@
 
 import 'mapbox-gl/dist/mapbox-gl.css';
-import MapboxMap, { NavigationControl, FullscreenControl, useControl, type MapRef } from 'react-map-gl/mapbox';
+import MapboxMap, { NavigationControl, FullscreenControl, useControl} from 'react-map-gl/mapbox';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { useRef, type Dispatch, type SetStateAction, type RefObject} from 'react';
+import { useRef } from 'react';
 import type { Feature, Polygon } from 'geojson';
 import { Source, Layer } from 'react-map-gl/mapbox';
 import type { ZoneType } from './sites';
 import DrawDefaultStyles from '../MapBoxDrawDefaultTheme'
+import useMap from '../hooks/useMap';
 
 type MapProps = {
   isEditing: boolean,
-  zones: ZoneType[],
-  setZones: Dispatch<SetStateAction<ZoneType[]>>
-  mapRef: RefObject<MapRef | null>
 };
 
 
@@ -26,10 +24,13 @@ type DrawControlProps = ConstructorParameters<typeof MapboxDraw>[0] & {
 
 
 const DrawControl = (props: DrawControlProps) => {
+  const drawInstanceRef = useRef<MapboxDraw | null>(null);
   useControl<MapboxDraw>(() => {
-    const draw = new MapboxDraw(props);
-    props.onInit?.(draw);
-    return draw;
+   if (!drawInstanceRef.current) {
+      drawInstanceRef.current = new MapboxDraw(props);
+      props.onInit?.(drawInstanceRef.current);
+    }
+    return drawInstanceRef.current;
   },
     ({ map }) => {
       map.on('draw.create', props.onCreate);
@@ -48,10 +49,10 @@ const DrawControl = (props: DrawControlProps) => {
 
 
 
-const Map: React.FC<MapProps> = ({ isEditing, zones, setZones, mapRef }) => {
+const Map: React.FC<MapProps> = ({ isEditing }) => {
 
-  const drawRef = useRef<MapboxDraw | null>(null);
-
+  //const drawRef = useRef<MapboxDraw | null>(null);
+  const { drawRef, zones, setZones, mapRef } = useMap();
 
 
   const onCreate = (e: { features: [] }) => {
@@ -123,6 +124,7 @@ const Map: React.FC<MapProps> = ({ isEditing, zones, setZones, mapRef }) => {
           }
           onInit={(draw) => {
             drawRef.current = draw;
+            
             requestAnimationFrame(() => {
               if (isEditing) {
                 try {

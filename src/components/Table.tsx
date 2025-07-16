@@ -4,6 +4,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
+import useMap from '../hooks/useMap';
 
 
 
@@ -13,32 +14,70 @@ type ZoneRow = {
   type: string,
   area: number,
   parameter: number,
+  id: number,
 }
 
 
 
-const colHelper = createColumnHelper<ZoneRow>()
-const cols = [
-  colHelper.accessor('zoneName', {
-    cell: info => info.getValue(),
-   
-  }),
-  colHelper.accessor('type', {
-    cell: info => info.getValue(),
-  }),
-  colHelper.accessor('color', {
-    cell: info => info.getValue(),
-  }),
-  colHelper.accessor('area', {
-    cell: info => info.getValue(),
-  }),
-  colHelper.accessor('parameter', {
-    cell: info => info.getValue(),
-
-  }),
-];
-
 export default function Table({data}) {
+
+  const {drawRef, mapRef, setZones} = useMap();
+
+  const changeZoneColor  = (zoneId: number | string | undefined, color: string) => {
+    const id = String(zoneId);
+    
+    drawRef.current?.setFeatureProperty(id, 'color', color);
+    const zone = drawRef.current?.get(id);
+    drawRef.current?.delete(id);
+    drawRef.current?.add(zone);
+    setZones(prev =>
+      prev.map(zone =>
+        zone.feature.id === zoneId ? { ...zone, feature: {...zone.feature, properties: { color: color }}} : zone
+      )
+    );
+
+  }
+  const moveToZone = (feature: Feature<Polygon>) => {
+    if (feature) {
+      const [minLng, minLat, maxLng, maxLat] = bbox(feature);
+
+      mapRef.current?.fitBounds(
+        [
+          [minLng, minLat],
+          [maxLng, maxLat]
+        ],
+        {padding: 40, duration: 1000}
+      );
+    }
+  }
+
+  const colHelper = createColumnHelper<ZoneRow>()
+  const cols = [
+    colHelper.accessor('zoneName', {
+      cell: info => info.getValue(),
+    
+    }),
+    colHelper.accessor('type', {
+      cell: info => info.getValue(),
+    }),
+    colHelper.accessor('color', {
+      cell: info => <div>
+        {info.getValue()}
+          <button onClick={() => {changeZoneColor(info.row.original.id, 'green')}}>green</button>
+          <button onClick={() => {changeZoneColor(info.row.original.id, 'yellow')}}>yellow</button> 
+          <button onClick={() => {changeZoneColor(info.row.original.id, 'brown')}}>brown</button>
+      </div>,
+    }),
+    colHelper.accessor('area', {
+      cell: info => `${(info.getValue()).toFixed(1)} m2`,
+    }),
+    colHelper.accessor('parameter', {
+      cell: info => `${(info.getValue()).toFixed(1)} m`,
+
+    }),
+  ];
+
+
   
   const table = useReactTable({
     data,
