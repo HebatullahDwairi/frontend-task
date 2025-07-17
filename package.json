@@ -12,8 +12,10 @@
   "dependencies": {
     "@headlessui/react": "^2.2.4",
     "@mapbox/mapbox-gl-draw": "^1.5.0",
+    "@mapbox/togeojson": "^0.16.2",
     "@tailwindcss/vite": "^4.1.11",
     "@tanstack/react-table": "^8.21.3",
+    "@tmcw/togeojson": "^7.1.2",
     "@turf/turf": "^7.2.0",
     "@types/mapbox__mapbox-gl-draw": "^1.4.9",
     "@types/mapbox-gl": "^3.4.1",

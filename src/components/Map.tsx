@@ -4,12 +4,15 @@ import MapboxMap, { NavigationControl, FullscreenControl, useControl} from 'reac
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { useRef } from 'react';
-import type { Feature, Polygon } from 'geojson';
+import type { Feature, GeoJsonProperties, Polygon } from 'geojson';
 import { Source, Layer } from 'react-map-gl/mapbox';
 import type { ZoneType } from './sites';
 import DrawDefaultStyles from '../MapBoxDrawDefaultTheme'
 import useMap from '../hooks/useMap';
 import { bbox } from '@turf/turf';
+import { Upload } from 'lucide-react';
+import { kml } from '@tmcw/togeojson';
+import toast from 'react-hot-toast';
 
 type MapProps = {
   isEditing: boolean,
@@ -56,7 +59,6 @@ const Map: React.FC<MapProps> = ({ isEditing }) => {
 
 
   const onCreate = (e: { features: [] }) => {
-    console.log(e.features);
     
     setZones(prev => {
       const newZones: ZoneType[] = e.features.map((f: Feature<Polygon>, i: number) => {
@@ -97,6 +99,54 @@ const Map: React.FC<MapProps> = ({ isEditing }) => {
 
   const onDelete = (e: { features: Feature<Polygon>[] }) => {    
     setZones(prev => prev.filter((zone) => zone.feature.id !== e.features[0].id));
+  }
+
+  const handleKmlUpload = (e : React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) {
+      toast.error('please select a file');
+      return;
+    }
+    
+    const file = e.target.files[0];
+    if(!file ) return;
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const val = e.target?.result;
+      const parser = new DOMParser();
+      const kmlFile = parser.parseFromString(typeof val === 'string' ? val : '', 'text/xml');
+
+
+      const geojson = kml(kmlFile);
+
+
+      const newZones: Feature<Polygon, GeoJsonProperties>[] = geojson.features
+        .filter((f): f is Feature<Polygon, GeoJsonProperties> => f.geometry?.type === 'Polygon')
+        .map((f) => {
+          f.properties = {
+            color: 'steelblue'
+          };
+          f.id = crypto.randomUUID();
+
+          return f;
+        });
+
+      drawRef.current?.add({type:'FeatureCollection', features: newZones});
+      
+      setZones(prev => {
+        const zones: ZoneType[] = newZones.map((f: Feature<Polygon>, i: number) => {
+          return {
+            feature: f,
+            name: `Zone-${prev.length + i + 1}`,
+          };
+        });
+
+        return [...prev, ...zones];
+      });
+    }
+
+    reader.readAsText(file);
+    
   }
 
 
@@ -186,7 +236,20 @@ const Map: React.FC<MapProps> = ({ isEditing }) => {
       {isEditing &&
         <p className='absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 p-2 text-white text-xs font-bold rounded-md backdrop-blur-md'>
           Draw & Add a New Zone
-        </p>}
+        </p>
+      }
+      {isEditing &&
+        <button className='absolute top-4 left-4 bg-white p-2 text-black text-sm font-bold rounded-md hover:bg-gray-100'>
+          <div className="flex gap-1 items-center">
+            <Upload size={17}/>
+            <label htmlFor="file-upload" className="custom-file-button">
+              Import KML
+            </label>
+            
+          </div>
+          <input type="file" id='file-upload' onChange={handleKmlUpload} style={{ display: "none" }}  />
+        </button>
+      }
     </div>
   );
 }
