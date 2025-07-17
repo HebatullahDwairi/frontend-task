@@ -23,7 +23,7 @@ const Zones: React.FC<ZonesProps> = ({isEditing, setIsEditing }) => {
 
   return (
     <div className="flex-2/3  bg-white rounded-xl p-4 ">
-      <div className="w-full flex justify-between">
+      <div className="w-full flex justify-between ">
         <p className="font-bold">Zones</p>
         <button  
           className="bg-black rounded-md text-white text-sm font-bold p-2 px-3 hover:bg-gray-800 transition-colors"
@@ -34,7 +34,7 @@ const Zones: React.FC<ZonesProps> = ({isEditing, setIsEditing }) => {
       </div>
 
       
-      <div className="w-full flex flex-col ">
+      <div className="w-full flex flex-col flex-1">
         {zones.length > 0 ? <Table
           data={zones.map(z => ({
             zoneName: z.name,
