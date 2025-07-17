@@ -2,6 +2,7 @@ import {  Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { useState } from 'react';
 import useMap from '../../hooks/useMap';
 import { Trash } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 
 const DeletionModal = ({id, zoneName} : {id: number | string | undefined, zoneName: string}) => {
@@ -11,6 +12,7 @@ const DeletionModal = ({id, zoneName} : {id: number | string | undefined, zoneNa
   const deleteZone = (id: number | string | undefined) => {
     drawRef.current?.delete(String(id));
     setZones(prev => prev.filter(z => z.feature.id !== id));
+    toast.success('zone deleted successfully!');
   }
 
   return (

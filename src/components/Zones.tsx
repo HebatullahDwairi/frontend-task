@@ -2,6 +2,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { area, length } from "@turf/turf";
 import Table from "./Table";
 import useMap from "../hooks/useMap";
+import toast from "react-hot-toast";
 
 type ZonesProps = {
   isEditing: boolean,
@@ -14,6 +15,9 @@ const Zones: React.FC<ZonesProps> = ({isEditing, setIsEditing }) => {
   const { zones } = useMap();
 
   const handleClick = () => {
+    if(isEditing) {
+      toast.success('Zones saved!');
+    }
     setIsEditing(!isEditing);
   }
 
