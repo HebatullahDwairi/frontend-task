@@ -124,6 +124,7 @@ const Map: React.FC<MapProps> = ({ isEditing }) => {
               ],
               {padding: 30, duration: 3000}
             );
+            console.log('map is ready')
         }}
       >
         <NavigationControl />
@@ -136,7 +137,7 @@ const Map: React.FC<MapProps> = ({ isEditing }) => {
           />
         </Source>
         
-        {isEditing && <DrawControl
+        {isEditing && <DrawControl 
           displayControlsDefault={false}
           controls={{
             polygon: true,
@@ -191,7 +192,7 @@ const Map: React.FC<MapProps> = ({ isEditing }) => {
 }
 
 
-const EXAMPLE = {
+const EXAMPLE : Feature<Polygon>= {
   "id": "WHvpm5nJ6K68FZh01jmqEDjWvTKTuC5O",
   "type": "Feature",
   "properties": {

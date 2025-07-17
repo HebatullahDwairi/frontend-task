@@ -18,7 +18,7 @@ export default [
     'paint': {
       'fill-color': [
         'case',
-        ['==', ['get', 'active'], 'true'], orange,
+        ['==', ['get', 'active'], 'true'], blue,
         ['coalesce', ['get', 'user_color'], blue],
       ],
       'fill-opacity': 0.3,

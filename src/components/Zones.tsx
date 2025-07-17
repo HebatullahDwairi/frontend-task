@@ -21,8 +21,12 @@ const Zones: React.FC<ZonesProps> = ({isEditing, setIsEditing }) => {
     <div className="flex-2/3  bg-white rounded-xl p-4 ">
       <div className="w-full flex justify-between">
         <p className="font-bold">Zones</p>
-        <button className="bg-black rounded-md text-white text-sm font-bold p-2 px-3 hover:bg-gray-800 transition-colors"
-        onClick={handleClick}>{isEditing? 'Save' : 'Add or Edit'}</button>
+        <button  
+          className="bg-black rounded-md text-white text-sm font-bold p-2 px-3 hover:bg-gray-800 transition-colors"
+          onClick={handleClick}
+        >
+          {isEditing? 'Save' : 'Add or Edit'}
+        </button>
       </div>
 
       
@@ -34,7 +38,8 @@ const Zones: React.FC<ZonesProps> = ({isEditing, setIsEditing }) => {
             area: area(z.feature),
             parameter: length(z.feature) * 1000,
             color: z.feature.properties?.color,
-            id: z.feature.id
+            id: z.feature.id,
+            actions:''
           }))}
           isEditing={isEditing}
         />:
