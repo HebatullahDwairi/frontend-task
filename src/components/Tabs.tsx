@@ -17,9 +17,9 @@ const Tabs = () => {
   return (
     <TabGroup className='flex-1 flex flex-col'>
       <div className="h-10 p-3">
-        <TabList className="flex gap-3 text-sm text-gray-500 font-semibold">
+        <TabList className="flex gap-3 text-sm text-gray-500 font-semibold ">
           {tabNames.map(tab => 
-            <Tab className='data-selected:border-b-2 border-red-600'>
+            <Tab className='data-selected:border-b-2 border-red-600' key={tab}>
               {tab}
             </Tab>)}
         </TabList>
@@ -30,7 +30,7 @@ const Tabs = () => {
           <TabPanel>Dashboard</TabPanel>
           <TabPanel>Media</TabPanel>
           <TabPanel>Documentation</TabPanel>
-          <TabPanel className='w-full flex gap-3'>
+          <TabPanel className='w-full flex gap-3 flex-col lg:flex-row portrait:flex-col'>
             <ZonesTab />
           </TabPanel>
           <TabPanel>assets</TabPanel>

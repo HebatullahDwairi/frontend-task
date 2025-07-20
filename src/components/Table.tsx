@@ -13,7 +13,7 @@ import EditableTextCell from './Table/EditableTextCell';
 import DeletionModal from './Table/DeletionModal';
 import ColorSelectorMenu from './Table/ColorSelectorMenu';
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, StepBackIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight} from 'lucide-react';
 
 
 export type ZoneRow = {
@@ -41,6 +41,14 @@ export default function Table({data, isEditing}: TableProps) {
     pageIndex: 0
   });
 
+  /*const [selected, setSelected] = useState(null);
+
+  useEffect(() => {
+    if(selected) {
+      moveToZone(selected);
+    }
+  }, [selected]);
+*/
   
   const moveToZone = (id: number | string | undefined) => {
     const zone : ZoneType[] = zones.filter(z => z.feature.id === id);
@@ -83,7 +91,11 @@ export default function Table({data, isEditing}: TableProps) {
     }),
     colHelper.accessor('parameter', {
       header: "Parameter",
-      cell: info => `${info.getValue() > 1000 ? Math.round(info.getValue()/1000) + ' km' : Math.round(info.getValue()) + ' m'}`,
+      cell: info => `${
+        info.getValue() > 1000 ?
+        Math.round(info.getValue()/1000) + ' km' 
+        :
+         Math.round(info.getValue()) + ' m'}`,
     }),
     colHelper.accessor('actions', {
       header: "Actions",

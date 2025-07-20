@@ -21,7 +21,14 @@ const ColorSelectorMenu = ({isEditing, info}:
       }
       setZones(prev =>
         prev.map(zone =>
-          zone.feature.id === zoneId ? { ...zone, feature: {...zone.feature, properties: { color: color }}} : zone
+          zone.feature.id === zoneId ? 
+            { ...zone,
+              feature: {
+                ...zone.feature,
+                properties: { color: color }
+              }
+            } 
+          : zone
         )
       );
     }
@@ -45,6 +52,7 @@ const ColorSelectorMenu = ({isEditing, info}:
       <ListboxButton 
         className="w-5 h-5 rounded-full" 
         style={{backgroundColor: currColor}}>
+          
       </ListboxButton>
 
       <ListboxOptions 

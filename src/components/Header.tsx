@@ -6,9 +6,9 @@ export default function Header () {
   const mins = date.getMinutes();
 
   return (
-    <div className="w-screen bg-white p-2 shadow-xm ">
-      <div className="max-w-7xl flex justify-between items-center w-screen mx-auto">
-        <p className="font-black text-xl italic">SAGER</p>
+    <div className="w-screen bg-white shadow-xm ">
+      <div className="p-2 flex justify-between items-center mx-auto max-w-7xl">
+        <p className="font-black text-xl italic portrait:ml-17">SAGER</p>
         <input type="text" placeholder="search" className="border-gray-300 border rounded-md p-1"/>
         <div className="flex gap-3 items-center text-gray-800">
           <p>{hour}:{mins} </p>

@@ -12,7 +12,6 @@ import useMap from '../hooks/useMap';
 import { bbox } from '@turf/turf';
 import { Upload } from 'lucide-react';
 import { kml } from '@tmcw/togeojson';
-import toast from 'react-hot-toast';
 
 type MapProps = {
   isEditing: boolean,
@@ -40,11 +39,13 @@ const DrawControl = (props: DrawControlProps) => {
       map.on('draw.create', props.onCreate);
       map.on('draw.update', props.onUpdate);
       map.on('draw.delete', props.onDelete);
+     // map.on('draw.selectionchange', props.onSelection);
     },
     ({ map }) => {
       map.off('draw.create', props.onCreate);
       map.off('draw.update', props.onUpdate);
       map.off('draw.delete', props.onDelete);
+     // map.off('draw.selectionchange', props.onSelection);
     });
 
   return null;
@@ -53,10 +54,7 @@ const DrawControl = (props: DrawControlProps) => {
 
 
 const Map: React.FC<MapProps> = ({ isEditing }) => {
-
-  //const drawRef = useRef<MapboxDraw | null>(null);
   const { drawRef, zones, setZones, mapRef } = useMap();;
-
 
   const onCreate = (e: { features: [] }) => {
     
@@ -103,7 +101,6 @@ const Map: React.FC<MapProps> = ({ isEditing }) => {
 
   const handleKmlUpload = (e : React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) {
-      toast.error('please select a file');
       return;
     }
     
@@ -151,7 +148,7 @@ const Map: React.FC<MapProps> = ({ isEditing }) => {
 
 
   return (
-    <div className="w-1/3 bg-white rounded-xl relative" id="map" style={{ height: '100%' }}>
+    <div className="w-full portrait:w-full lg:w-2/5 bg-white rounded-xl relative" id="map" style={{ height: '100%' }}>
       <MapboxMap
         mapboxAccessToken={import.meta.env.VITE_MAPBOX_TOKEN}
         ref={mapRef}
@@ -206,9 +203,7 @@ const Map: React.FC<MapProps> = ({ isEditing }) => {
             requestAnimationFrame(() => {
               if (isEditing) {
                 try {
-                  //draw.deleteAll();
                   zones.forEach((z) => draw.add(z.feature));
-                  console.log(zones[0].feature)
                 }
                 catch (err) {
                   console.log(err);
@@ -247,7 +242,11 @@ const Map: React.FC<MapProps> = ({ isEditing }) => {
             </label>
             
           </div>
-          <input type="file" id='file-upload' onChange={handleKmlUpload} style={{ display: "none" }}  />
+          <input 
+            type="file" 
+            id='file-upload' 
+            onChange={handleKmlUpload}
+            style={{ display: "none" }}  />
         </button>
       }
     </div>
